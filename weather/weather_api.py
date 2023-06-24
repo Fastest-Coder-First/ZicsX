@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
 import requests
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class WeatherAPI:
     BASE_URL = "https://api.openweathermap.org/data/2.5/"
 
     def __init__(self, location):
         self.location = location
-        self.api_key = "9b6ddb5e5d8eed54e365254a61712750"
+        self.api_key = os.getenv("OPEN_WEATHER_MAP_API_KEY")
 
     def get_current_weather(self):
         url = f"{self.BASE_URL}weather"
