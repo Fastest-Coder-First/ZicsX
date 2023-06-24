@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-
 import pytz
 from .weather_api import WeatherAPI
 from .utils import format_temperature, format_datetime
