@@ -16,12 +16,22 @@ def main():
     forecast = Forecast(location)
 
     # Display weather forecast based on command-line options
-    if args.hourly:
-        forecast.display_hourly_forecast()
-    elif args.days is not None:
-        forecast.display_forecast_for_multiple_days(args.days)
+    if args.detailed and args.days is not None and args.hourly:
+        forecast.display_detailed_forecast_for_multiple_days_hourly(args.days)
+    elif args.detailed and args.days is not None:
+        forecast.display_detailed_forecast_for_multiple_days(args.days)
+    elif args.hourly and args.days is not None:
+        forecast.display_hourly_forecast_for_multiple_days(args.days)
+    elif args.detailed and args.hourly:
+        forecast.display_detailed_hourly_forecast()
     elif args.detailed:
         forecast.display_detailed_forecast()
+    elif args.days is not None and args.hourly:
+        forecast.display_hourly_forecast_for_multiple_days(args.days)
+    elif args.days is not None:
+        forecast.display_forecast_for_multiple_days(args.days)
+    elif args.hourly:
+        forecast.display_hourly_forecast()
     else:
         forecast.display_basic_forecast()
 
