@@ -1,39 +1,30 @@
-from weather.cli_parser import CliParser
+from datetime import datetime, timedelta
 from weather.forecast import Forecast
+from weather.cli_parser import parse_arguments
 
-def main():
-    # Parse command-line arguments
-    cli_parser = CliParser()
-    args = cli_parser.parse_arguments()
+args = parse_arguments()
 
-    # Validate command-line arguments
-    cli_parser.validate_arguments(args)
+location = args.location
+days = args.days
+detailed = args.detailed
+hourly = args.hourly
 
-    # Retrieve location from command-line arguments
-    location = args.location
+forecast = Forecast(location)
 
-    # Initialize Forecast object
-    forecast = Forecast(location)
-
-    # Display weather forecast based on command-line options
-    if args.detailed and args.days is not None and args.hourly:
-        forecast.display_detailed_forecast_for_multiple_days_hourly(args.days)
-    elif args.detailed and args.days is not None:
-        forecast.display_detailed_forecast_for_multiple_days(args.days)
-    elif args.hourly and args.days is not None:
-        forecast.display_hourly_forecast_for_multiple_days(args.days)
-    elif args.detailed and args.hourly:
-        forecast.display_detailed_hourly_forecast()
-    elif args.detailed:
-        forecast.display_detailed_forecast()
-    elif args.days is not None and args.hourly:
-        forecast.display_hourly_forecast_for_multiple_days(args.days)
-    elif args.days is not None:
-        forecast.display_forecast_for_multiple_days(args.days)
-    elif args.hourly:
+if detailed and days > 1:
+    forecast.display_detailed_forecast_for_multiple_days(days)
+elif detailed:
+    forecast.display_detailed_forecast()
+elif days > 1 and hourly:
+    for i in range(days):
+        date = (datetime.now() + timedelta(days=i)).strftime("%Y-%m-%d")
+        print()
+        print("############################################")
+        print(f"Hourly Forecast for {date}")
+        print("############################################")
+        forecast.display_hourly_forecast(date)
+else:
+    if hourly:
         forecast.display_hourly_forecast()
     else:
-        forecast.display_basic_forecast()
-
-if __name__ == "__main__":
-    main()
+        forecast.display_forecast_for_multiple_days(days)

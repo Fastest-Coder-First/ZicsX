@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+import pytz
 from .weather_api import WeatherAPI
 from .utils import format_temperature, format_datetime
 
@@ -6,106 +9,121 @@ class Forecast:
         self.weather_api = WeatherAPI(location)
 
     def display_basic_forecast(self):
-        """
-        Display the basic weather forecast.
-        """
-        current_weather = self.weather_api.get_current_weather()
-
-        if "error" in current_weather:
-            print("Error:", current_weather["error"])
-        else:
-            location = current_weather["name"]
-            temperature = current_weather["main"]["temp"]
-            weather_condition = current_weather["weather"][0]["description"]
+        try:
+            weather_data = self.weather_api.get_current_weather()
+            temperature = weather_data["main"]["temp"]
+            weather_condition = weather_data["weather"][0]["description"]
 
             print("----------------------------------------")
             print("    WEATHER FORECAST")
             print("----------------------------------------")
-            print(f"Location: {location}")
-            print("Date:", format_datetime(current_weather["dt"]))
-            print("Temperature:", format_temperature(temperature))
-            print("Weather Condition:", weather_condition)
+            print(f"Location: {self.weather_api.location}")
+            print("Date: Today")
+            print(f"Temperature: {format_temperature(temperature)}")
+            print(f"Weather Condition: {weather_condition}")
+        except Exception as e:
+            print("Error occurred while fetching weather data:", str(e))
 
     def display_detailed_forecast(self):
-        """
-        Display the detailed weather forecast.
-        """
-        current_weather = self.weather_api.get_current_weather()
-
-        if "error" in current_weather:
-            print("Error:", current_weather["error"])
-        else:
-            location = current_weather["name"]
-            temperature = current_weather["main"]["temp"]
-            weather_condition = current_weather["weather"][0]["description"]
-            humidity = current_weather["main"]["humidity"]
-            wind_speed = current_weather["wind"]["speed"]
-            precipitation = current_weather.get("rain", {}).get("1h", 0)
-            uv_index = current_weather.get("uv_index", "N/A")
-            sunrise = current_weather["sys"]["sunrise"]
-            sunset = current_weather["sys"]["sunset"]
+        try:
+            weather_data = self.weather_api.get_current_weather()
+            temperature = weather_data["main"]["temp"]
+            weather_condition = weather_data["weather"][0]["description"]
+            humidity = weather_data["main"]["humidity"]
+            wind_speed = weather_data["wind"]["speed"]
+            precipitation = weather_data.get("rain", {}).get("1h", 0)
+            uv_index = weather_data.get("uvi", 0)
+            sunrise_time = weather_data["sys"]["sunrise"]
+            sunset_time = weather_data["sys"]["sunset"]
 
             print("----------------------------------------")
             print("    WEATHER FORECAST")
             print("----------------------------------------")
-            print(f"Location: {location}")
-            print("Date:", format_datetime(current_weather["dt"]))
-            print("Temperature:", format_temperature(temperature))
-            print("Weather Condition:", weather_condition)
-            print("Humidity:", humidity, "%")
-            print("Wind Speed:", wind_speed, "km/h")
-            print("Precipitation:", precipitation, "mm")
-            print("UV Index:", uv_index)
-            print("Sunrise Time:", format_datetime(sunrise))
-            print("Sunset Time:", format_datetime(sunset))
+            print(f"Location: {self.weather_api.location}")
+            print("Date: Today")
+            print(f"Temperature: {format_temperature(temperature)}")
+            print(f"Weather Condition: {weather_condition}")
+            print(f"Humidity: {humidity}%")
+            print(f"Wind Speed: {wind_speed} km/h")
+            print(f"Precipitation: {precipitation} mm")
+            print(f"UV Index: {uv_index}")
+            print(f"Sunrise Time: {format_datetime(sunrise_time)}")
+            print(f"Sunset Time: {format_datetime(sunset_time)}")
+        except Exception as e:
+            print("Error occurred while fetching weather data:", str(e))
 
     def display_forecast_for_multiple_days(self, days):
-        """
-        Display the weather forecast for multiple days.
-        """
-        forecast = self.weather_api.get_three_hour_forecast(days)
-
-        if "error" in forecast:
-            print("Error:", forecast["error"])
-        else:
-            location = forecast["city"]["name"]
+        try:
+            daily_forecast = self.weather_api.get_daily_forecast(days)
 
             print("----------------------------------------")
             print("    WEATHER FORECAST")
             print("----------------------------------------")
-            print(f"Location: {location}")
+            print(f"Location: {self.weather_api.location}")
 
-            for item in forecast["list"]:
-                date = format_datetime(item["dt"])
+            for item in daily_forecast:
+                date = item["dt_txt"].split()[0]
                 temperature = item["main"]["temp"]
                 weather_condition = item["weather"][0]["description"]
 
-                print("\nDate:", date)
-                print("Temperature:", format_temperature(temperature))
-                print("Weather Condition:", weather_condition)
+                print()
+                print(f"Date: {date}")
+                print(f"Temperature: {format_temperature(temperature)}")
+                print(f"Weather Condition: {weather_condition}")
+        except Exception as e:
+            print("Error occurred while fetching weather data:", str(e))
 
-    def display_hourly_forecast(self):
-        """
-        Display the hourly weather forecast.
-        """
-        forecast = self.weather_api.get_three_hour_forecast()
-
-        if "error" in forecast:
-            print("Error:", forecast["error"])
-        else:
-            location = forecast["city"]["name"]
+    # display hourly forecast for the date given as parameter or none will the current date
+    def display_hourly_forecast(self, date=None):
+        try:
+            hourly_forecast = self.weather_api.get_hourly_forecast(date)
 
             print("----------------------------------------")
-            print("    HOURLY WEATHER FORECAST")
+            print("    WEATHER FORECAST")
             print("----------------------------------------")
-            print(f"Location: {location}")
-            print("Date:", format_datetime(forecast["list"][0]["dt"]))
+            print(f"Location: {self.weather_api.location}")
 
-            for item in forecast["list"]:
-                hour = format_datetime(item["dt"], format="%H:%M")
+            for item in hourly_forecast:
+                date = item["dt_txt"]
                 temperature = item["main"]["temp"]
                 weather_condition = item["weather"][0]["description"]
 
-                print(f"\nHour: {hour}")
-                print("Temperature:", format_temperature(temperature))
-                print("Weather Condition:", weather_condition)
+                print()
+                print(f"Date: {date}")
+                print(f"Temperature: {format_temperature(temperature)}")
+                print(f"Weather Condition: {weather_condition}")
+        except Exception as e:
+            print("Error occurred while fetching weather data:", str(e))
+
+    def display_detailed_forecast_for_multiple_days(self, days):
+        try:
+            daily_forecast = self.weather_api.get_daily_forecast(days)
+
+            print("----------------------------------------")
+            print("    WEATHER FORECAST")
+            print("----------------------------------------")
+            print(f"Location: {self.weather_api.location}")
+
+            for item in daily_forecast:
+                date = item["dt_txt"].split()[0]
+                temperature = item["main"]["temp"]
+                weather_condition = item["weather"][0]["description"]
+                humidity = item["main"]["humidity"]
+                wind_speed = item["wind"]["speed"]
+                precipitation = item.get("rain", {}).get("1h", 0)
+                uv_index = item.get("uvi", 0)
+                sunrise_time = item["sys"]["sunrise"]
+                sunset_time = item["sys"]["sunset"]
+
+                print()
+                print(f"Date: {date}")
+                print(f"Temperature: {format_temperature(temperature)}")
+                print(f"Weather Condition: {weather_condition}")
+                print(f"Humidity: {humidity}%")
+                print(f"Wind Speed: {wind_speed} km/h")
+                print(f"Precipitation: {precipitation} mm")
+                print(f"UV Index: {uv_index}")
+                print(f"Sunrise Time: {format_datetime(sunrise_time)}")
+                print(f"Sunset Time: {format_datetime(sunset_time)}")
+        except Exception as e:
+            print("Error occurred while fetching weather data:", str(e))
